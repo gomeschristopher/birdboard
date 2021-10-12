@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
-    use HasFactory;
+    use HasFactory, recordsActivity;
 
     protected $guarded = [];
 
@@ -16,6 +16,8 @@ class Task extends Model
     protected $casts = [
         'completed' => 'boolean'
     ];
+
+    protected static $recordableEvents = ['created', 'deleted'];
 
     public function project()
     {
@@ -38,5 +40,10 @@ class Task extends Model
         $this->update(['completed' => false]);
 
         $this->project->recordActivity('incompleted_task');
+    }
+
+    public function activity()
+    {
+        return $this->morphMany(Activity::class, 'subject')->latest();
     }
 }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
-    use HasFactory;
+    use HasFactory, recordsActivity;
 
     protected $guarded = [];
 
@@ -31,13 +31,13 @@ class Project extends Model
         return $this->tasks()->create(compact('body'));
     }
 
-    public function activity()
+    public function invite(User $user)
     {
-        return $this->hasMany(Activity::class);
+        return $this->members()->attach($user);
     }
 
-    public function recordActivity($description)
+    public function members()
     {
-        $this->activity()->create(compact('description'));
+        return $this->belongsToMany(User::class, 'project_members');
     }
 }
