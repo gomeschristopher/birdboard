@@ -7,7 +7,15 @@
             <a href="/projects" class="text-gray-400 text-sm font-normal no-outline">My projects</a> / {{ $project->title }}
         </p>
 
-        <a href="{{ $project->path() . '/edit' }}" class="btn btn-blue">Edit project</a>
+        <div class="flex items-center">
+            @foreach ($project->members as $member)
+            <img src="{{ gravatar_url($member->email) }}" alt="{{ $member->name }}'s avatar" class="rounded-full w-8 mr-2">
+            @endforeach
+
+            <img src="{{ gravatar_url($project->owner->email) }}" alt="{{ $project->owner->name }}'s avatar" class="rounded-full w-8 mr-2">
+
+            <a href="{{ $project->path().'/edit' }}" class="button ml-4">Edit Project</a>
+        </div>
     </div>
 
 </header>
@@ -25,7 +33,7 @@
                         @csrf
                         <div class="flex">
                             <input name="body" value="{{ $task->body }}" class="w-full {{ $task->completed ? 'text-gray-400' : ''}}">
-                        <input type="checkbox" name="completed" onchange="this.form.submit()" {{ $task->completed ? 'checked' : ''}}>
+                            <input type="checkbox" name="completed" onchange="this.form.submit()" {{ $task->completed ? 'checked' : ''}}>
                         </div>
                     </form>
                 </div>
@@ -48,25 +56,23 @@
                     @csrf
                     @method('PATCH')
                     <textarea name="notes" class="card w-full" style="min-height: 200px;">
-                        {{ $project->notes }}
+                    {{ $project->notes }}
                     </textarea>
                     <button type="submit" class="btn btn-blue">Save</button>
                 </form>
-               
+
+                @include ('errors')
             </div>
 
         </div>
 
         <div class="lg:w-1/4 px-3 lg:py-8">
-                @include ('projects.card')
-                @include ('projects.activity.card')
-
-                <!--
-                @can ('manage', $project)
-                    @include ('projects.invite')
-                @endcan
--->
-            </div>
+            @include ('projects.card')
+            @include ('projects.activity.card')
+            @can ('manage', $project)
+            @include ('projects.invite')
+            @endcan
+        </div>
     </div>
 
 </main>

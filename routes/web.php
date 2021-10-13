@@ -24,6 +24,8 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => 'auth'], fu
     Route::post('/projects/{project}/tasks', 'ProjectTasksController@store');
     Route::patch('/tasks/{task}', 'ProjectTasksController@update');
 
+    Route::post('/projects/{project}/invitations', 'ProjectInvitationsController@store');
+
     Route::post('/projects', 'ProjectsController@store');
 });
 

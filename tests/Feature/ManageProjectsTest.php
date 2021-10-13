@@ -27,26 +27,34 @@ class ManageProjectsTest extends TestCase
     /** @test */
     public function a_user_can_create_a_project()
     {
+        $this->withoutExceptionHandling();
+        
         $this->signIn();
 
-        $attributes =  [
-            'title' => $this->faker->sentence(),
-            'description' => $this->faker->sentence(),
-            'notes' => 'General notes here.'
+        $this->get('/projects/create')->assertStatus(200);
+
+        $this->followingRedirects()
+            ->post('/projects', $attributes = Project::factory()->raw())
+            ->assertSee($attributes['title'])
+            //->assertSee($attributes['description'])
+            ->assertSee($attributes['notes']);
+    }
+
+    /** @test */
+    function tasks_can_be_included_as_part_a_new_project_creation()
+    {
+        $this->signIn();
+
+        $attributes = Project::factory()->raw();
+
+        $attributes['tasks'] = [
+            ['body' => 'Task 1'],
+            ['body' => 'Task 2']
         ];
 
-        $response = $this->post('/projects', $attributes);
+        $this->post('/projects', $attributes);
 
-        $project = Project::where($attributes)->first();
-
-        $response->assertRedirect($project->path());
-
-        $this->assertDatabaseHas('projects', $attributes);
-
-        $this->get($project->path())
-            ->assertSee($attributes['title'])
-            ->assertSee($attributes['description'])
-            ->assertSee($attributes['notes']);
+        $this->assertCount(2, Project::first()->tasks);
     }
 
     /** @test */
@@ -141,11 +149,13 @@ class ManageProjectsTest extends TestCase
         $this->delete($project->path())
             ->assertRedirect('/login');
 
-        $this->signIn();
+        $user = $this->signIn();
 
         $this->delete($project->path())->assertStatus(403);
 
-        //$this->assertDatabaseMissing('projects', $project->only('id'));
+        $project->invite($user);
+
+        $this->actingAs($user)->delete($project->path())->assertStatus(403);
     }
 
     /** @test */

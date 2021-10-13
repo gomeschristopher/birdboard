@@ -40,4 +40,9 @@ class Project extends Model
     {
         return $this->belongsToMany(User::class, 'project_members')->withTimestamps();
     }
+
+    public function addTasks($tasks)
+    {
+        return $this->tasks()->createMany($tasks);
+    }
 }
